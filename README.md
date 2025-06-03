@@ -17,6 +17,9 @@ Pleiotropy-informed conditional and conjunctional false discovery rate allows to
 If you use pleioFDR software for your research publication, please cite the following paper(s):
 * Andreassen, O.A. et al. Improved detection of common variants associated with schizophrenia and bipolar disorder using pleiotropy-informed conditional false discovery rate. PLoS Genet 9, e1003455 (2013). 
 
+For an introduction about pleioFDR, please see
+* Olav B Smeland et al, Discovery of shared genomic loci using the conditional false discovery rate approach, Hum Genet. 2020 Jan;139(1)
+
 The pleioFDR software may not be used in medical applications.
 
 ## Quick Start
