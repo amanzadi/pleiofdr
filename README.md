@@ -8,7 +8,7 @@
 * [Run pleioFDR](#run-pleiofdr)
 * [pleioFDR results](#pleiofdr-results)
 * [FUMA-defined loci](#fuma-defined-loci)
-* [Octave support](#octave-support)
+* [Runtime](#runtime)
 
 ## Introduction
 
@@ -29,7 +29,8 @@ To install and run pleioFDR on a small example, constrained to chromosome 21:
 git clone https://github.com/precimed/pleiofdr && cd pleiofdr
 wget https://precimed.s3-eu-west-1.amazonaws.com/pleiofdr/pleioFDR_demo_data.tar.gz
 tar -xzvf pleioFDR_demo_data.tar.gz
-matlab -nodisplay -nosplash < runme.m
+apptainer build --fakeroot pleiofdr.sif Apptainer.def
+./pleiofdr-run config.txt
 ```
 
 To install and run pleioFDR using full example:
@@ -39,7 +40,8 @@ wget https://precimed.s3-eu-west-1.amazonaws.com/pleiofdr/ref9545380_1kgPhase3eu
 wget https://precimed.s3-eu-west-1.amazonaws.com/pleiofdr/CTG_COG_2018.mat
 wget https://precimed.s3-eu-west-1.amazonaws.com/pleiofdr/SSGAC_EDU_2016.mat
 cp config_default.txt config.txt
-matlab -nodisplay -nosplash < runme.m
+apptainer build --fakeroot pleiofdr.sif Apptainer.def
+./pleiofdr-run config.txt
 ```
 
 For the description of the data, see [here](https://precimed.s3-eu-west-1.amazonaws.com/pleiofdr/about.txt).
@@ -48,7 +50,7 @@ For the results, inspect the ``results`` folder.
 ## Install pleioFDR
 
 Prerequisites:
- - matlab (tested with versions >= 2015)
+ - Apptainer (or Singularity)
  - workstation with at least 16GB of RAM
  
 The following step by step instruction assumes you are using Linux, however the same can be done in Windows or Mac with minimal modifications.
@@ -131,15 +133,12 @@ and prepare input files for cond/conj fdr analysis (mat):
   * set ``randprune_n=500`` instead of the default ``randprune_n=20``
   You may also want to change ``traitfile1`` and ``traitfiles`` options.
   
-  Start matlab.
-  
-  Change current folder to the root of ``pleiofdr`` repository (i.e. a folder containing ``pleiotropy_analysis.m``).
-  
-  Execute ``runme`` command, which should trigger pleiofdr analysis.
+  Build the versioned Octave runtime once, then run from the root of this repository.
 
   To run pleioFDR from console:
     ```
-    matlab -nodisplay -nosplash < runme.m
+    apptainer build --fakeroot pleiofdr.sif Apptainer.def
+    ./pleiofdr-run config.txt
     ```
     
 ## pleioFDR results
@@ -150,8 +149,8 @@ and prepare input files for cond/conj fdr analysis (mat):
    * table with LD-independent significant loci
    * table with all analyzed variants and their cond/conj FDR values
    * conditional qq plots and enrichment plots
-   * Manhattan plot (by default only .fig file, so you need to open it with
-     matlab and save in another format separately)
+   * Manhattan plot (PNG/SVG output is supported; proprietary `.fig`
+     interoperability is not guaranteed)
    * log file
    * ``results.mat`` file containing condFDR or conjFDR values for all SNPs
 
@@ -163,33 +162,26 @@ and prepare input files for cond/conj fdr analysis (mat):
   and ``pandas.DataFrame.to_csv``), and then perform ``sumstats.py clump``.
   At this step you may use ``ref9545380_bfile.tar.gz`` as a reference to preform clumping.
 
-## Octave support
+## Runtime
 
-NB! Octave support is experimental and not officially supported.
+Build the runtime with `apptainer build --fakeroot pleiofdr.sif Apptainer.def`.
+It contains GNU Octave with the statistics and I/O packages. `pleiofdr-run` mounts
+the current directory at `/work`, so existing relative paths in `config.txt` keep
+working. Set `PLEIOFDR_IMAGE` to use a released `.sif` file.
 
-install additional packages:
-  ```
-  octave --no-gui <(echo "pkg install -forge io statistics")
-  octave --no-gui <(echo "pkg install -forge nan")
-  ```
+## Python orchestration
 
-install  gammainc function:
-  
-  ```
-  wget http://savannah.gnu.org/bugs/download.php?file_id=37342 -O gammainc.m
-  wget http://savannah.gnu.org/bugs/download.php?file_id=37341 -O __gammainc_lentz.cc
-  mkoctfile __gammainc_lentz.cc 
-  ```
+Python pipelines should invoke the existing compatibility interface rather than
+reimplement the analysis:
 
-run:
+```python
+from pathlib import Path
+import subprocess
 
-  ```
-  octave --no-gui runme.m
-  ```
+worktree = Path("/path/to/pleiofdr-run-1")
+subprocess.run([worktree / "pleiofdr-run", "config.txt"], cwd=worktree, check=True)
+```
 
-#### Octave notes:
-* last tested with octave version 4.0.2
-* *.mat files need to be saved with "-v7" max:
-  ```
-  save('ref9545380_1kgPhase3eur_LDr2p1.mat', '-v7') 
-  ```
+Use a separate repository worktree (or copied checkout) and `config.txt` for each
+concurrent run. Python packaging, Python-native results, and a scientific Python
+port are deferred until V1 compatibility is validated.

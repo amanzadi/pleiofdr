@@ -103,8 +103,8 @@ edges{2} = edges{2} - 0.5*(edges{2}(2)-edges{2}(1));  % shift half-bin to imitat
 
 hlp  = hist3(lpmat,'Edges',edges);
 if is_octave()
-    hlp(1,1002)=0;
-    hlp(32,1)=0;
+    hlp(1,end)=0;
+    hlp(end,1)=0;
 end
 hcmat12 = flipud( cumsum(flipud(hlp),1) );  % lp2-cumulative histogram
 

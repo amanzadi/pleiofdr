@@ -36,8 +36,6 @@ for tf1, tn1  in zip(trait_file1, trait_name1):
         config = config_template.substitute(par_dict)
         with open('config.txt', 'w') as f:
             f.write(config)
-        command = ['matlab', '-nodisplay', '-nosplash', '<', 'runme.m']
-        subprocess.run(command)
+        subprocess.run(['./pleiofdr-run', 'config.txt'], check=True)
 
 print('Done')
-

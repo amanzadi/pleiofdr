@@ -24,7 +24,6 @@
 
 if is_octave()
     pkg load statistics;
-    pkg load nan;
     graphics_toolkit('gnuplot');
 end
 

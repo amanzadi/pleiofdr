@@ -36,8 +36,8 @@ sed -i -e "/outputdir=/c\outputdir="results_"$trait1name"_"$trait2name"_"condfdr
     -i -e "/stattype=/c\stattype=condfdr" \
     -i -e "/fdrthresh=/c\fdrthresh=0.01" config.txt
 
-# Run Matlab now for cond_FDR
-matlab -nodesktop -r "run runme.m; exit"
+# Run pleioFDR now for cond_FDR
+./pleiofdr-run config.txt
 
 #For conj_FDR
 # Output directory
@@ -47,6 +47,6 @@ sed -i -e "/outputdir=/c\outputdir="results_"$trait1name"_"$trait2name"_"conjfdr
 
 # Run Matlab now for conj_FDR
 
-matlab -nodesktop -r "run runme.m; exit"
+./pleiofdr-run config.txt
 done
 done

@@ -1,0 +1,16 @@
+Bootstrap: debootstrap
+OSVersion: bookworm
+MirrorURL: https://deb.debian.org/debian
+Include: apt
+
+%post
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends octave octave-io octave-statistics gnuplot-nox
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+%environment
+    export GNUTERM=pngcairo
+
+%runscript
+    exec octave-cli --no-gui --quiet "$@"

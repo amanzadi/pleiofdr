@@ -144,6 +144,7 @@ end
 
 
 if ~isempty(cfg.get_str(CFG_REFINFO_STR))
+    if is_octave(), pkg load io; end
     refinfo=cfg.get_str(CFG_REFINFO_STR);
     fprintf('Loading additional reference information file ("%s") ...', refinfo);
     refinfo_df=readtable(refinfo, 'Delimiter', 'tab', 'FileType', 'text');

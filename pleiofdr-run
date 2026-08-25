@@ -1,0 +1,28 @@
+#!/bin/sh
+set -eu
+
+if [ "$#" -gt 1 ]; then
+    echo "usage: pleiofdr-run [config.txt]" >&2
+    exit 64
+fi
+
+config=${1:-config.txt}
+if [ ! -f "$config" ]; then
+    echo "pleiofdr-run: config not found: $config" >&2
+    exit 66
+fi
+
+workdir=$(pwd -P)
+runtime=${PLEIOFDR_RUNTIME:-apptainer}
+image=${PLEIOFDR_IMAGE:-pleiofdr.sif}
+command='args = argv (); config = args{1}; run("/work/runme.m");'
+
+case "$runtime" in
+apptainer|singularity)
+    exec "$runtime" exec --bind "$workdir:/work" --pwd /work "$image" octave-cli --no-gui --quiet --eval "$command" "$config"
+    ;;
+*)
+    echo "pleiofdr-run: unsupported runtime: $runtime" >&2
+    exit 64
+    ;;
+esac
